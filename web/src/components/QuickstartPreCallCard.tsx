@@ -24,11 +24,11 @@ export function QuickstartPreCallCard({
 			}}
 		>
 			<h1 className="text-[28px] font-medium leading-[1.2] text-white">
-				Custom LLM Recipe
+				Translator Recipe
 			</h1>
 			<p className="mt-[14px] text-sm font-medium leading-6 text-muted-foreground">
-				Bring your own LLM to Agora&apos;s Conversational AI Engine via a custom
-				OpenAI-compatible proxy server.
+				Speak in the source language; the agent translates and speaks it in the
+				target language. Set SOURCE_LANG / TARGET_LANG.
 			</p>
 
 			<Button
