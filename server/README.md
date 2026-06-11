@@ -1,15 +1,17 @@
-# Agora Agent Backend — Custom LLM Recipe
+# Agora Agent Backend — Translator Recipe
 
 FastAPI service that owns Agora token generation and agent session lifecycle for
-the custom-llm recipe. It is the service the web client reaches through the
+the translator recipe. It is the service the web client reaches through the
 Next.js `/api/*` rewrite proxy (port 8000).
 
-## What's different from the base quickstart
+## What this service does
 
-The LLM stage uses the SDK's `CustomLLM` vendor instead of a managed
-`OpenAI(model="gpt-4o-mini")`. It points the agent at your own OpenAI-compatible
-endpoint (the `llm/` server in this repo) via `CUSTOM_LLM_URL`. STT (Deepgram)
-and TTS (MiniMax) remain Agora-managed.
+Runs the translation pipeline using only Agora-managed vendors — **zero-key**:
+
+**Pipeline:** `DeepgramSTT(language=SOURCE_LANG)` → `OpenAI` (translate to `TARGET_LANG`) → `MiniMaxTTS(voice_id=TTS_VOICE)`
+
+The `OpenAI` vendor is Agora-managed (keyless by default). There is **no
+separate `llm/` service** in this recipe.
 
 ## Run
 
@@ -27,15 +29,22 @@ python src/server.py
 
 `server/.env.example` is the template. Required:
 
-- `AGORA_APP_ID`, `AGORA_APP_CERTIFICATE` — Agora project credentials.
-- `CUSTOM_LLM_URL` — the **public** chat-completions URL of your `llm/` endpoint
-  (e.g. `https://<tunnel>/chat/completions`). Agora cloud calls this directly, so
-  it cannot be `localhost`.
-- `CUSTOM_LLM_API_KEY` — forwarded by Agora cloud as `Authorization: Bearer`.
-  Required by the `CustomLLM` vendor.
+- `AGORA_APP_ID` — Agora project App ID.
+- `AGORA_APP_CERTIFICATE` — Agora project App Certificate.
 
-Optional: `CUSTOM_LLM_MODEL` (default `mock-model`), `AGENT_GREETING`, `PORT`
-(default `8000`).
+Optional:
+
+| Variable | Default | Notes |
+| --- | :---: | --- |
+| `SOURCE_LANG` | `es` | Deepgram STT language code for the speaker |
+| `TARGET_LANG` | `English` | Language name used in the translation prompt |
+| `TTS_VOICE` | `English_captivating_female1` | MiniMax voice matching `TARGET_LANG` |
+| `OPENAI_MODEL` | `gpt-4o-mini` | OpenAI model for translation |
+| `OPENAI_API_KEY` | — | BYO only — Agora manages the OpenAI key by default (keyless). Set only if your account requires it. |
+| `AGENT_GREETING` | built-in | Optional opening line override |
+
+> Note: when you change `TARGET_LANG`, also pick a matching `TTS_VOICE` for
+> that target language.
 
 ## API
 
